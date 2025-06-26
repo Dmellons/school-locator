@@ -1,5 +1,6 @@
 :root {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px; /* Base font size for rem calculations */
   --title-color: #282F7F;
   --background-color-rgb: 34,42,124;
   --background-color: rgb(var(--background-color-rgb));
@@ -14,11 +15,11 @@
   --error-color: #dc3545;
   --text-color: #212529;
   --text-muted: #6c757d;
-  --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  --shadow-hover: 0 4px 8px rgba(0, 0, 0, 0.15);
-  --border-radius: 8px;
+  --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+  --shadow-hover: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
+  --border-radius: 0.5rem;
   --transition: all 0.3s ease;
-  background: rgba(var(--background-color-rgb), 0.65);
+  background: rgba(var(--background-color-rgb), 0.35);
   color: var(--text-color);
 }
 
@@ -28,10 +29,9 @@
 
 body {
   margin: 0;
-  padding: 20px;
+  padding: 1.25rem;
   line-height: 1.6;
-  height: full;
-
+  min-height: 100vh;
 }
 
 /* Loading overlay */
@@ -51,13 +51,13 @@ body {
 }
 
 .loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid var(--border-color);
-  border-top: 4px solid var(--call-to-action);
+  width: 3.125rem;
+  height: 3.125rem;
+  border: 0.25rem solid var(--border-color);
+  border-top: 0.25rem solid var(--call-to-action);
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
 }
 
 @keyframes spin {
@@ -66,7 +66,7 @@ body {
 }
 
 .loading-message {
-  font-size: 18px;
+  font-size: 1.125rem;
   color: var(--text-muted);
   font-weight: 500;
 }
@@ -74,10 +74,10 @@ body {
 /* Error messages */
 .error-message {
   position: fixed;
-  top: 20px;
+  top: 1.25rem;
   left: 50%;
   transform: translateX(-50%);
-  padding: 12px 24px;
+  padding: 0.75rem 1.5rem;
   border-radius: var(--border-radius);
   font-weight: 500;
   z-index: 1000;
@@ -90,7 +90,7 @@ body {
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(-20px);
+    transform: translateX(-50%) translateY(-1.25rem);
   }
   to {
     opacity: 1;
@@ -114,19 +114,19 @@ body {
 }
 
 .content {
-  max-width: 1200px;
+  max-width: 75rem; /* 1200px */
   margin: 0 auto;
-  padding: 30px;
+  padding: 1.875rem;
   background: white;
-  border-radius: 12px;
+  border-radius: 0.75rem;
   box-shadow: var(--shadow);
   overflow: hidden;
 }
 
 .title-text {
   color: var(--title-color);
-  font-size: clamp(20px, 4vw, 28px);
-  margin-bottom: 8px;
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+  margin-bottom: 0.5rem;
   font-weight: 700;
   line-height: 1.2;
 }
@@ -138,10 +138,10 @@ body {
 }
 
 .logo {
-  height: 96px;
+  height: 6rem;
   border-right: 2px solid var(--border-color);
-  padding-right: 16px;
-  width: 96px;
+  padding-right: 1rem;
+  width: 6rem;
   transition: var(--transition);
 }
 
@@ -152,33 +152,31 @@ body {
 .header {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 30px;
+  gap: 1rem;
+  margin-bottom: 1.875rem;
   flex-wrap: wrap;
 }
 
 .subtitle {
   font-weight: 400;
-  font-size: 16px;
+  font-size: 1rem;
   color: var(--text-muted);
   margin: 0;
 }
 
 .description {
-  font-size: 18px;
-  margin-bottom: 30px;
+  font-size: 1.125rem;
+  margin-bottom: 1.875rem;
   color: var(--text-muted);
   text-align: center;
 }
 
 .school-search-form {
-  /* background: linear-gradient(135deg, var(--background-color) 0%, #e9ecef 100%); */
   background: rgba(var(--background-color-rgb), 0.15);
-  
-  padding: 28px;
+  padding: 1.75rem;
   border-radius: var(--border-radius);
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05), var(--shadow);
-  margin-bottom: 24px;
+  margin-bottom: 1.5rem;
   border: 1px solid var(--border-color);
   position: relative;
 }
@@ -195,31 +193,31 @@ body {
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .form-label {
   display: block;
   font-weight: 600;
   color: var(--text-color);
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 .form-help {
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: 0.875rem;
   margin: 0;
 }
 
 .form-input {
   width: 100%;
-  padding: 12px 16px;
+  padding: 0.75rem 1rem;
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
-  font-size: 16px;
+  font-size: 1rem;
   transition: var(--transition);
   background: white;
 }
@@ -236,14 +234,14 @@ body {
 
 .form-submit {
   align-self: flex-start;
-  padding: 12px 24px;
+  padding: 0.75rem 1.5rem;
   border: none;
   border-radius: var(--border-radius);
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
-  min-width: 120px;
+  min-width: 7.5rem;
 }
 
 .form-submit {
@@ -268,7 +266,8 @@ body {
 
 .map-canvas {
   width: 100%;
-  height: 500px;
+  height: 60vh; /* Responsive height based on viewport */
+  min-height: 25rem; /* Minimum height in rem */
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
   overflow: hidden;
@@ -284,32 +283,32 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   color: var(--text-muted);
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 500;
 }
 
 .map-error {
-  padding: 24px;
+  padding: 1.5rem;
   text-align: center;
   color: var(--text-color);
   background: linear-gradient(135deg, #f8f9ff 0%, #e3f2fd 100%);
   border: 2px solid var(--call-to-action);
   border-radius: var(--border-radius);
-  margin: 20px;
+  margin: 1.25rem;
   box-shadow: var(--shadow);
-  max-width: 500px;
-  margin: 20px auto;
+  max-width: 31.25rem;
+  margin: 1.25rem auto;
 }
 
 .map-error h3 {
   color: var(--call-to-action);
-  margin: 0 0 16px 0;
-  font-size: 20px;
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
   font-weight: 600;
 }
 
 .map-error p {
-  margin: 0 0 16px 0;
+  margin: 0 0 1rem 0;
   line-height: 1.5;
   color: var(--text-muted);
 }
@@ -326,13 +325,13 @@ body {
 
 /* Out of bounds message in results container */
 .out-of-bounds-message {
-  grid-column: 1 / -1; /* Span all columns */
+  grid-column: 1 / -1;
   text-align: center;
   background: linear-gradient(135deg, #f8f9ff 0%, #e3f2fd 100%);
   border: 2px solid var(--call-to-action);
   border-radius: var(--border-radius);
-  margin: 20px 0; /* Remove auto margin since we're in grid */
-  max-width: none; /* Remove max-width to allow full span */
+  margin: 1.25rem 0;
+  max-width: none;
   box-shadow: var(--shadow);
   position: relative;
   overflow: hidden;
@@ -367,7 +366,7 @@ body {
   display: block;
   text-decoration: none;
   color: inherit;
-  padding: 32px;
+  padding: 2rem;
   width: 100%;
   height: 100%;
 }
@@ -379,8 +378,8 @@ body {
 
 .out-of-bounds-message h3 {
   color: var(--call-to-action);
-  margin: 0 0 16px 0;
-  font-size: 22px;
+  margin: 0 0 1rem 0;
+  font-size: 1.375rem;
   font-weight: 600;
   transition: var(--transition);
 }
@@ -391,9 +390,9 @@ body {
 
 .out-of-bounds-message p {
   color: var(--text-muted);
-  margin: 0 0 16px 0;
+  margin: 0 0 1rem 0;
   line-height: 1.6;
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 .out-of-bounds-message p:last-child {
@@ -413,7 +412,7 @@ body {
   background: linear-gradient(135deg, var(--card-color) 0%, #fafbfc 100%);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
   transition: var(--transition);
   box-shadow: var(--shadow);
   position: relative;
@@ -448,7 +447,7 @@ body {
   display: block;
   text-decoration: none;
   color: inherit;
-  padding: 24px;
+  padding: 1.5rem;
   width: 100%;
   height: 100%;
   text-align: center;
@@ -460,8 +459,8 @@ body {
 }
 
 .school-card h3 {
-  font-size: 18px;
-  margin: 0 0 8px 0;
+  font-size: 1.125rem;
+  margin: 0 0 0.5rem 0;
   color: var(--title-color);
   font-weight: 600;
   line-height: 1.3;
@@ -473,8 +472,8 @@ body {
 }
 
 .school-card p {
-  font-size: 14px;
-  margin: 8px 0 0 0;
+  font-size: 0.875rem;
+  margin: 0.5rem 0 0 0;
   color: var(--text-muted);
   line-height: 1.4;
 }
@@ -483,8 +482,8 @@ body {
   cursor: pointer;
   transition: var(--transition);
   display: inline-block;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
   background: rgba(0, 86, 179, 0.05);
   border: 1px solid transparent;
 }
@@ -497,20 +496,20 @@ body {
 
 .school-grades {
   font-weight: 500;
-  font-size: 12px;
+  font-size: 0.75rem;
   color: var(--call-to-action);
   background: rgba(0, 86, 179, 0.1);
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
   display: inline-block;
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
 }
 
 .results-container {
   background: rgba(var(--background-color-rgb), 0.15);
-  padding: 0 28px;
-  border-bottom-left-radius: 12px;
-  border-bottom-right-radius: 12px;
+  padding: 0 1.75rem;
+  border-bottom-left-radius: 0.75rem;
+  border-bottom-right-radius: 0.75rem;
   box-shadow: var(--shadow-hover);
   max-height: 0;
   opacity: 0;
@@ -537,20 +536,20 @@ body {
 }
 
 .results-container.expanded {
-  max-height: 800px;
+  max-height: 50rem;
   opacity: 1;
-  padding: 28px;
+  padding: 1.75rem;
 }
 
 .results-container-schools {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(17.5rem, 1fr));
+  gap: 1rem;
 }
 
 .results-container-title {
   color: var(--title-color);
-  font-size: 24px;
+  font-size: 1.5rem;
   margin: 0 0 1rem 0;
   text-align: center;
   font-weight: 700;
@@ -561,18 +560,18 @@ button {
   color: var(--call-to-action-text);
   border: none;
   border-radius: var(--border-radius);
-  padding: 16px 32px;
+  padding: 1rem 2rem;
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
-  margin: 8px 4px;
+  margin: 0.5rem 0.25rem;
   cursor: pointer;
   transition: var(--transition);
-  box-shadow: 0 4px 12px rgba(0, 86, 179, 0.3);
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 86, 179, 0.3);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.03125rem;
   position: relative;
   overflow: hidden;
 }
@@ -595,12 +594,12 @@ button:hover::before {
 button:hover:not(:disabled) {
   background: linear-gradient(135deg, var(--call-to-action-hover), #0066cc);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 86, 179, 0.4);
+  box-shadow: 0 0.375rem 1.25rem rgba(0, 86, 179, 0.4);
 }
 
 button:active {
   transform: translateY(1px);
-  box-shadow: 0 2px 8px rgba(0, 86, 179, 0.3);
+  box-shadow: 0 0.125rem 0.5rem rgba(0, 86, 179, 0.3);
 }
 
 button:disabled {
@@ -616,28 +615,29 @@ button:focus,
   outline-offset: 2px;
 }
 
-/* Responsive design */
-@media only screen and (max-width: 768px) {
+/* Responsive design using em-based breakpoints */
+@media only screen and (max-width: 48em) { /* 768px */
   body {
-    padding: 10px;
+    padding: 0.625rem;
   }
   
   .content {
-    padding: 20px;
+    padding: 1.25rem;
   }
   
   .header {
     flex-direction: column;
     text-align: center;
-    gap: 12px;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
   }
   
   .logo {
     border-right: none;
     border-bottom: 2px solid var(--border-color);
     padding-right: 0;
-    padding-bottom: 12px;
-    margin-bottom: 12px;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
   }
   
   .form-group {
@@ -647,44 +647,44 @@ button:focus,
   .form-submit {
     align-self: center;
     width: 100%;
-    max-width: 200px;
+    max-width: 12.5rem;
   }
   
   .map-canvas {
-    height: 400px;
+    height: 50vh;
+    min-height: 20rem;
   }
   
   .results-container-schools {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 0.75rem;
   }
   
   .results-container.expanded {
-    max-height: 1000px;
+    max-height: 62.5rem;
   }
   
-  .school-card {
-    padding: 16px;
-    margin-bottom: 12px;
+  .school-card-link {
+    padding: 1rem;
   }
   
   .title-text {
-    font-size: 22px;
+    font-size: clamp(1.125rem, 4vw, 1.375rem);
   }
   
   .description {
-    font-size: 16px;
+    font-size: 1rem;
   }
 }
 
-@media only screen and (min-width: 769px) and (max-width: 1024px) {
+@media only screen and (min-width: 48.0625em) and (max-width: 64em) { /* 769px - 1024px */
   .form-group {
     text-align: center;
   }
   
   .form-submit {
     align-self: center;
-    max-width: 200px;
+    max-width: 12.5rem;
   }
   
   .results-container-schools {
@@ -692,11 +692,11 @@ button:focus,
   }
   
   .results-container.expanded {
-    max-height: 900px;
+    max-height: 56.25rem;
   }
 }
 
-@media only screen and (min-width: 1025px) {
+@media only screen and (min-width: 64.0625em) { /* 1025px+ */
   .results-container-schools {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -706,7 +706,7 @@ button:focus,
 @media (prefers-contrast: high) {
   :root {
     --border-color: #000;
-    --shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
   }
   
   .form-input,
@@ -744,7 +744,7 @@ button:focus,
   
   .map-canvas {
     border: 1px solid #000;
-    height: 300px;
+    height: 18.75rem;
   }
 }
 
