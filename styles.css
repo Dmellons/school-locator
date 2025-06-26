@@ -1,7 +1,8 @@
 :root {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --title-color: #282F7F;
-  --background-color: #f8f9fa;
+  --background-color-rgb: 34,42,124;
+  --background-color: rgb(var(--background-color-rgb));
   --card-color: #ffffff;
   --border-color: #dee2e6;
   --call-to-action: #0056b3;
@@ -17,7 +18,7 @@
   --shadow-hover: 0 4px 8px rgba(0, 0, 0, 0.15);
   --border-radius: 8px;
   --transition: all 0.3s ease;
-  background: var(--background-color);
+  background: rgba(var(--background-color-rgb), 0.5);
   color: var(--text-color);
 }
 
@@ -29,7 +30,7 @@ body {
   margin: 0;
   padding: 20px;
   line-height: 1.6;
-  background: var(--background-color);
+  background: rgba(var(--background-color-rgb), 0.5);
 }
 
 /* Loading overlay */
@@ -119,8 +120,6 @@ body {
   border-radius: 12px;
   box-shadow: var(--shadow);
   overflow: hidden;
-  margin-top: 20px;
-  margin-bottom: 20px;
 }
 
 .title-text {
@@ -172,7 +171,9 @@ body {
 }
 
 .school-search-form {
-  background: linear-gradient(135deg, var(--background-color) 0%, #e9ecef 100%);
+  /* background: linear-gradient(135deg, var(--background-color) 0%, #e9ecef 100%); */
+  background: rgba(var(--background-color-rgb), 0.15);
+  
   padding: 28px;
   border-radius: var(--border-radius);
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05), var(--shadow);
@@ -505,7 +506,7 @@ body {
 }
 
 .results-container {
-  background: linear-gradient(135deg, var(--background-color) 0%, #e9ecef 100%);
+  background: rgba(var(--background-color-rgb), 0.15);
   padding: 0 28px;
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
