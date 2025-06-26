@@ -248,33 +248,46 @@
       const addressInput = document.getElementById('address');
       if (!addressInput) return;
       
-      window.AppState.autocomplete = new google.maps.places.Autocomplete(
-        addressInput,
-        {
-          types: ['address'],
-          componentRestrictions: {
-            country: 'US',
-          },
-          fields: ['place_id', 'geometry', 'name', 'formatted_address']
-        }
-      );
+      try {
+        window.AppState.autocomplete = new google.maps.places.Autocomplete(
+          addressInput,
+          {
+            types: ['address'],
+            componentRestrictions: {
+              country: 'US',
+            },
+            fields: ['place_id', 'geometry', 'name', 'formatted_address']
+          }
+        );
 
-      window.AppState.autocomplete.addListener('place_changed', onAddressChanged);
-      
-      // Enhanced keyboard support
-      addressInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          setTimeout(() => {
-            const place = window.AppState.autocomplete.getPlace();
-            if (place && place.geometry) {
-              showAddress(place.formatted_address || place.name);
-            } else {
-              showAddress(this.value);
-            }
-          }, 100);
-        }
-      });
+        // Add bounds bias for San Leandro area for better suggestions
+        const sanLeandroBounds = new google.maps.LatLngBounds(
+          new google.maps.LatLng(37.69, -122.20),
+          new google.maps.LatLng(37.75, -122.13)
+        );
+        window.AppState.autocomplete.setBounds(sanLeandroBounds);
+
+        window.AppState.autocomplete.addListener('place_changed', onAddressChanged);
+        
+        // Enhanced keyboard support
+        addressInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            setTimeout(() => {
+              const place = window.AppState.autocomplete.getPlace();
+              if (place && place.geometry) {
+                showAddress(place.formatted_address || place.name);
+              } else {
+                showAddress(this.value);
+              }
+            }, 100);
+          }
+        });
+        
+      } catch (error) {
+        console.error('Failed to initialize autocomplete:', error);
+        // Graceful degradation - form still works without autocomplete
+      }
     }
 
     function onAddressChanged() {
@@ -285,8 +298,17 @@
         return;
       }
       
+      // Show subtle loading indication
+      const addressInput = document.getElementById('address');
+      addressInput.style.opacity = '0.7';
+      
       // Auto-trigger search when a place is selected
       showAddress(place.formatted_address || place.name);
+      
+      // Reset opacity after search starts
+      setTimeout(() => {
+        addressInput.style.opacity = '1';
+      }, 100);
     }
 
     function clearResults() {
@@ -810,6 +832,8 @@
       </h1>
     </div>
     
+    <p class="description">Type in your address to find your neighborhood schools!</p>
+    
     <form action="#" onsubmit="showAddress(this.address.value); return false" class="school-search-form">
       <div class="form-group">
         <label for="address" class="form-label">Address Search</label>
@@ -817,10 +841,11 @@
                id="address" 
                name="address" 
                placeholder="2600 Teagarden St, San Leandro, CA 94577"
+"
                class="form-input"
                autocomplete="street-address"
                aria-describedby="address-help" />
-        <small id="address-help" class="form-help">Enter your full address including city and state to find your neighborhood schools!</small>
+        <small id="address-help" class="form-help">Start typing for address suggestions • Include city and state for best results</small>
         <input type="submit" value="Search" class="form-submit" />
       </div>
     </form>

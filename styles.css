@@ -19,8 +19,9 @@
   --shadow-hover: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
   --border-radius: 0.5rem;
   --transition: all 0.3s ease;
-  background: rgba(var(--background-color-rgb), 0.35);
   color: var(--text-color);
+  background: rgba(var(--background-color-rgb), 0.15);
+  
 }
 
 * {
@@ -605,6 +606,40 @@ button:active {
 button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Google Places Autocomplete Styling */
+.pac-container {
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-hover);
+  border: 1px solid var(--border-color);
+  font-family: inherit;
+  z-index: 1000;
+}
+
+.pac-item {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.pac-item:hover {
+  background-color: rgba(0, 86, 179, 0.05);
+}
+
+.pac-item:first-child {
+  border-top: none;
+}
+
+.pac-item-query {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.pac-matched {
+  font-weight: 700;
+  color: var(--call-to-action);
 }
 
 /* Focus styles for accessibility */
