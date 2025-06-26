@@ -4,19 +4,20 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <title>SLUSD School Boundary Lookup</title>
-  <meta name="description" content="Find your neighborhood schools in San Leandro Unified School District by entering your address">
+  <meta name="description"
+    content="Find your neighborhood schools in San Leandro Unified School District by entering your address">
 
   <meta name="robots" content="index,follow" />
   <meta name="Googlebot" content="follow" />
   <meta name="googlebot" content="archive" />
   <meta name="distribution" content="global" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <!-- Preload critical resources -->
   <link rel="preload" href="styles.css" as="style">
-  
+
   <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
-  
+
   <!-- Load configuration and Google Maps -->
   <script src="config.js"></script>
   <script type="text/javascript">
@@ -36,13 +37,13 @@
 
     // Enhanced error handling
     window.AppError = {
-      show: function(message, type = 'error') {
+      show: function (message, type = 'error') {
         const errorDiv = document.getElementById('error-message');
         if (errorDiv) {
           errorDiv.textContent = message;
           errorDiv.className = `error-message ${type}`;
           errorDiv.style.display = 'block';
-          
+
           // Auto-hide success messages
           if (type === 'success') {
             setTimeout(() => {
@@ -51,8 +52,8 @@
           }
         }
       },
-      
-      hide: function() {
+
+      hide: function () {
         const errorDiv = document.getElementById('error-message');
         if (errorDiv) {
           errorDiv.style.display = 'none';
@@ -62,7 +63,7 @@
 
     // Loading state management
     window.LoadingState = {
-      show: function(message = 'Loading...') {
+      show: function (message = 'Loading...') {
         const loadingDiv = document.getElementById('loading-overlay');
         const messageDiv = document.getElementById('loading-message');
         if (loadingDiv && messageDiv) {
@@ -70,21 +71,21 @@
           loadingDiv.style.display = 'flex';
         }
       },
-      
-      hide: function() {
+
+      hide: function () {
         const loadingDiv = document.getElementById('loading-overlay');
         if (loadingDiv) {
           loadingDiv.style.display = 'none';
         }
       }
     };
-    
+
     // Load additional scripts after Google Maps
     function loadAdditionalScripts() {
       return new Promise((resolve, reject) => {
         let scriptsLoaded = 0;
         const totalScripts = 2;
-        
+
         function onScriptLoad() {
           scriptsLoaded++;
           if (scriptsLoaded === totalScripts) {
@@ -92,7 +93,7 @@
             resolve();
           }
         }
-        
+
         // Load geoxml3
         const geoxml3Script = document.createElement('script');
         geoxml3Script.src = 'https://cdn.jsdelivr.net/gh/geocodezip/geoxml3/polys/geoxml3.js';
@@ -106,7 +107,7 @@
           document.head.appendChild(fallbackScript);
         };
         document.head.appendChild(geoxml3Script);
-        
+
         // Load v3_epoly
         const epolyScript = document.createElement('script');
         epolyScript.src = 'v3_epoly.js';
@@ -115,42 +116,42 @@
         document.head.appendChild(epolyScript);
       });
     }
-    
+
     // Enhanced initialization
-    window.initializeMap = async function() {
+    window.initializeMap = async function () {
       try {
         if (typeof google === 'undefined' || !google.maps) {
           throw new Error('Google Maps not loaded properly');
         }
-        
+
         window.LoadingState.show('Loading map components...');
         window.AppState.googleMapsLoaded = true;
-        
+
         await loadAdditionalScripts();
-        
+
         window.LoadingState.show('Initializing map...');
         await initialize();
-        
+
         window.AppState.mapInitialized = true;
         window.LoadingState.hide();
         window.AppError.hide();
-        
+
       } catch (error) {
         console.error('Map initialization failed:', error);
         window.LoadingState.hide();
         window.AppError.show('Failed to load map. Please refresh the page and try again.');
       }
     };
-    
+
     // Load Google Maps with better error handling
     function loadGoogleMaps() {
       if (typeof CONFIG === 'undefined' || !CONFIG.GOOGLE_MAPS_API_KEY) {
         window.AppError.show('Configuration error. Please contact support.');
         return;
       }
-      
+
       window.LoadingState.show('Loading Google Maps...');
-      
+
       const script = document.createElement('script');
       script.src = `https://maps.google.com/maps/api/js?key=${CONFIG.GOOGLE_MAPS_API_KEY}&libraries=places&callback=initializeMap`;
       script.async = true;
@@ -160,7 +161,7 @@
       };
       document.head.appendChild(script);
     }
-    
+
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', loadGoogleMaps);
@@ -173,20 +174,20 @@
     // Enhanced initialization function
     async function initialize() {
       console.log('Initializing map...');
-      
+
       try {
         window.AppState.geocoder = new google.maps.Geocoder();
-        window.AppState.infowindow = new google.maps.InfoWindow({ 
+        window.AppState.infowindow = new google.maps.InfoWindow({
           size: new google.maps.Size(150, 150),
           maxWidth: 300
         });
-        
+
         // Create the map with improved options
         const mapOptions = {
           zoom: 11,
           center: new google.maps.LatLng(37.721414578054706, -122.16614335227737),
           mapTypeControl: true,
-          mapTypeControlOptions: { 
+          mapTypeControlOptions: {
             style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
             position: google.maps.ControlPosition.TOP_RIGHT
           },
@@ -208,11 +209,11 @@
           document.getElementById("map_canvas"),
           mapOptions
         );
-        
-        window.AppState.geoXml = new geoXML3.parser({ 
-          map: window.AppState.map, 
-          singleInfoWindow: true, 
-          infoWindow: window.AppState.infowindow 
+
+        window.AppState.geoXml = new geoXML3.parser({
+          map: window.AppState.map,
+          singleInfoWindow: true,
+          infoWindow: window.AppState.infowindow
         });
 
         // Load the polygons for each school with better error handling
@@ -226,7 +227,7 @@
           'maps/roosevelt.xml',
           'maps/washington.xml'
         ];
-        
+
         schoolMaps.forEach(mapFile => {
           try {
             window.AppState.geoXml.parse(mapFile);
@@ -237,7 +238,7 @@
 
         initAutocomplete();
         console.log('Map initialized successfully');
-        
+
       } catch (error) {
         console.error('Failed to initialize map:', error);
         throw error;
@@ -247,7 +248,7 @@
     function initAutocomplete() {
       const addressInput = document.getElementById('address');
       if (!addressInput) return;
-      
+
       window.AppState.autocomplete = new google.maps.places.Autocomplete(
         addressInput,
         {
@@ -260,9 +261,9 @@
       );
 
       window.AppState.autocomplete.addListener('place_changed', onAddressChanged);
-      
+
       // Enhanced keyboard support
-      addressInput.addEventListener('keypress', function(e) {
+      addressInput.addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
           e.preventDefault();
           setTimeout(() => {
@@ -284,7 +285,7 @@
         console.log('No valid place selected');
         return;
       }
-      
+
       // Auto-trigger search when a place is selected
       showAddress(place.formatted_address || place.name);
     }
@@ -292,11 +293,11 @@
     function clearResults() {
       const resultsContainer = document.getElementById("resultsContainer");
       const resultsContainerSchools = document.getElementById("resultsContainerSchools");
-      
+
       if (resultsContainer) {
         resultsContainer.classList.remove('expanded');
       }
-      
+
       if (resultsContainerSchools) {
         resultsContainerSchools.innerHTML = '';
       }
@@ -459,16 +460,16 @@
       window.AppState.geocoder.geocode({ 'address': address }, function (results, status) {
         window.AppState.isSearching = false;
         window.LoadingState.hide();
-        
+
         if (status === google.maps.GeocoderStatus.OK) {
           try {
             const point = results[0].geometry.location;
-            
+
             // Clear previous marker
             if (window.AppState.currentMarker) {
               window.AppState.currentMarker.setMap(null);
             }
-            
+
             // Set marker for student home address
             window.AppState.currentMarker = new google.maps.Marker({
               map: window.AppState.map,
@@ -480,25 +481,25 @@
             let schoolName = null;
             let schoolInfo = null;
             const highSchool = highSchools[0];
-            
+
             // Find which school boundary contains this address
             for (let j = 0; j < window.AppState.geoXml.docs.length; j++) {
               for (let i = 0; i < window.AppState.geoXml.docs[j].gpolygons.length; i++) {
                 const polygon = window.AppState.geoXml.docs[j].gpolygons[i];
-                
+
                 // Error handling fallback for browsers that don't support Contains
                 if (typeof polygon.Contains !== 'function') {
                   handleBrowserCompatibilityError(address);
                   return;
                 }
-                
+
                 if (polygon.Contains(point)) {
                   // Get school name from xml file
                   const schoolNameLookup = window.AppState.geoXml.docs[j].baseUrl.split('/').pop().split('.')[0];
-                  
+
                   // Find school info
                   schoolInfo = schools.find(school => school.lookup === schoolNameLookup);
-                  
+
                   if (schoolInfo) {
                     schoolName = schoolInfo.schoolName;
                     break;
@@ -509,7 +510,7 @@
             }
 
             displayResults(address, schoolInfo, schools, middleSchools, highSchool, point);
-            
+
           } catch (error) {
             console.error('Error processing geocoding result:', error);
             window.AppError.show('An error occurred while processing your address. Please try again.');
@@ -521,22 +522,22 @@
     }
 
     function handleBrowserCompatibilityError(address) {
-      const errorMessage = address.includes('San Leandro') 
+      const errorMessage = address.includes('San Leandro')
         ? 'Error: There was an error loading your map. Please follow this link to continue your registration:'
         : 'Error: There was an error loading your map, and your address is outside of San Leandro. Please follow this link to continue your inter-district registration:';
-      
+
       const link = address.includes('San Leandro')
         ? 'https://sanleandro.schoolmint.net/signin'
         : 'https://www.slusd.us/families-community/enrollment/inter-district-transfers/';
-      
-      document.getElementById('map_canvas').innerHTML = 
+
+      document.getElementById('map_canvas').innerHTML =
         `<div class="map-error">${errorMessage}<br><br><a href="${link}" target="_blank">${link}</a></div>`;
     }
 
     function displayResults(address, schoolInfo, schools, middleSchools, highSchool, point) {
       // Create info window content
       let contentString = createInfoWindowContent(address, schoolInfo);
-      
+
       // Set up marker click event
       google.maps.event.addListener(window.AppState.currentMarker, 'click', function () {
         window.AppState.infowindow.setContent(contentString);
@@ -548,7 +549,7 @@
 
       // Center map on the found location
       window.AppState.map.setCenter(point);
-      
+
       // Update results panel
       updateResultsPanel(schoolInfo, highSchool);
     }
@@ -556,15 +557,15 @@
     function createInfoWindowContent(address, schoolInfo) {
       const homeIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
       const schoolIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 22v-4a2 2 0 1 0-4 0v4"/><path d="m18 10 4 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8l4-2"/><path d="M18 5v17"/><path d="m4 6 8-4 8 4"/><path d="M6 5v17"/><circle cx="12" cy="9" r="2"/></svg>';
-      
+
       let contentString = `<div style="display: flex; align-items: center;">${homeIcon}<div style="margin-left: 5px;">${address}</div></div>`;
-      
+
       if (schoolInfo) {
         contentString += `<br><div style="display: flex; align-items: center;">${schoolIcon} <div style="display: block; margin-left: 5px;"><strong><a href="${schoolInfo.schoolWebsite}" target="_blank">${schoolInfo.schoolName}</a></strong><div>${schoolInfo.schoolAddress}</div></div></div>`;
       } else {
         contentString += `<br><div style="display: flex; align-items: center;">${schoolIcon} <div style="display: block; margin-left: 5px;"><strong>Inter-District Transfer Process<br><a href="https://www.slusd.us/families-community/enrollment/inter-district-transfers/" target="_blank">Click here for enrollment information</a></strong></div></div>`;
       }
-      
+
       return contentString;
     }
 
@@ -572,20 +573,20 @@
       const resultsTitle = document.getElementById('resultsTitle');
       const resultsContainer = document.getElementById('resultsContainer');
       const resultsContainerSchools = document.getElementById('resultsContainerSchools');
-      
+
       if (!resultsContainer || !resultsTitle || !resultsContainerSchools) {
         console.error('Results container elements not found');
         return;
       }
-      
+
       // Clear previous results
       resultsContainerSchools.innerHTML = '';
-      
+
       if (schoolInfo && schoolInfo.middleSchool) {
         console.log('Displaying schools for:', schoolInfo.schoolName);
-        
+
         resultsTitle.innerHTML = '<a href="https://sanleandro.schoolmint.net/welcome" target="_blank"><button>Click here to enroll today!</button></a>';
-        
+
         const areaSchools = [
           {
             schoolName: schoolInfo.schoolName,
@@ -612,22 +613,25 @@
           console.log('Creating card for:', school.schoolName);
           displaySchool(school);
         });
-        
+
       } else {
         console.log('Address outside district or missing school info');
         resultsContainerSchools.innerHTML = `
-          <div class="out-of-bounds-message">
-            <h3>Inter-District Transfer Available</h3>
+        <div class="out-of-bounds-message">
+          <a href="https://www.slusd.us/families-community/enrollment/inter-district-transfers/" target="_blank">
+            <h3>Inter-District Transfer Process</h3>
             <p>Your address is outside of the <span class="highlight">San Leandro Unified School District</span> boundaries.</p>
             <p>No problem! You can still enroll through our Inter-District Transfer process.</p>
-          </div>
+          </a>
+            </div>
+
         `;
         resultsTitle.innerHTML = '<a href="https://www.slusd.us/families-community/enrollment/inter-district-transfers/" target="_blank"><button>Click here to start the Inter-District Transfer process</button></a>';
       }
-      
+
       // Show results with animation
       resultsContainer.classList.add('expanded');
-      
+
       // Scroll to results after a short delay to allow animation to start
       setTimeout(() => {
         resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -672,7 +676,7 @@
       resultsDiv.appendChild(schoolCard);
 
       // Add click event for address to open maps (prevent event bubbling)
-      schoolAddress.addEventListener('click', function(e) {
+      schoolAddress.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
         window.open(`https://maps.google.com/?q=${encodeURIComponent(school.schoolAddress)}`, '_blank');
@@ -716,28 +720,23 @@
         <span class="subtitle">San Leandro Unified School District</span>
       </h1>
     </div>
-    
+
     <p class="description">Type in your address to find your neighborhood schools!</p>
-    
+
     <form action="#" onsubmit="showAddress(this.address.value); return false" class="school-search-form">
       <div class="form-group">
         <label for="address" class="form-label">Address Search</label>
-        <input type="text" 
-               id="address" 
-               name="address" 
-               placeholder="2600 Teagarden St, San Leandro, CA 94577"
-               class="form-input"
-               autocomplete="street-address"
-               aria-describedby="address-help" />
+        <input type="text" id="address" name="address" placeholder="2600 Teagarden St, San Leandro, CA 94577"
+          class="form-input" autocomplete="street-address" aria-describedby="address-help" />
         <small id="address-help" class="form-help">Enter your full address including city and state</small>
         <input type="submit" value="Search" class="form-submit" />
       </div>
     </form>
-    
+
     <div id="map_canvas" class="map-canvas" role="application" aria-label="School district boundary map">
       <div class="map-loading">Loading map...</div>
     </div>
-    
+
     <div class="map-container">
       <div id="resultsContainer" class="results-container">
         <h2 id="resultsTitle" class="results-container-title">Your Schools</h2>
@@ -748,4 +747,5 @@
 
   <div class="clear"></div>
 </body>
+
 </html>
