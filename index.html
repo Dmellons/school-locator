@@ -1,0 +1,595 @@
+<!-- <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> -->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>SLUSD School Boundry Lookup</title>
+
+  <meta name="robots" content="index,follow" />
+  <meta name="Googlebot" content="follow" />
+  <meta name="googlebot" content="archive" />
+  <meta name="distribution" content="global" />
+  <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+  
+  <!-- Load configuration and Google Maps -->
+  <script src="config.js"></script>
+  <script type="text/javascript">
+    // Global variables to track loading state
+    window.googleMapsLoaded = false;
+    window.mapInitialized = false;
+    
+    // Load additional scripts after Google Maps
+    function loadAdditionalScripts() {
+      // Load geoxml3
+      const geoxml3Script = document.createElement('script');
+      geoxml3Script.src = 'https://cdn.jsdelivr.net/gh/geocodezip/geoxml3/polys/geoxml3.js';
+      geoxml3Script.onload = () => {
+        console.log('geoxml3 loaded');
+        // Load v3_epoly after geoxml3
+        const epolyScript = document.createElement('script');
+        epolyScript.src = 'v3_epoly.js';
+        epolyScript.onload = () => {
+          console.log('v3_epoly loaded');
+        };
+        document.head.appendChild(epolyScript);
+      };
+      document.head.appendChild(geoxml3Script);
+    }
+    
+    // Make initialize function global so it can be called by Google Maps callback
+    window.initializeMap = function() {
+      if (typeof google !== 'undefined' && google.maps) {
+        console.log('Google Maps loaded, loading additional scripts...');
+        window.googleMapsLoaded = true;
+        loadAdditionalScripts();
+        // Give scripts time to load before initializing
+        setTimeout(() => {
+          initialize();
+          window.mapInitialized = true;
+        }, 1000);
+      } else {
+        console.error('Google Maps not loaded properly');
+      }
+    };
+    
+    // Load Google Maps script
+    function loadGoogleMaps() {
+      if (typeof CONFIG !== 'undefined' && CONFIG.GOOGLE_MAPS_API_KEY) {
+        console.log('Loading Google Maps with API key:', CONFIG.GOOGLE_MAPS_API_KEY.substring(0, 10) + '...');
+        const script = document.createElement('script');
+        script.src = `https://maps.google.com/maps/api/js?key=${CONFIG.GOOGLE_MAPS_API_KEY}&libraries=places&callback=initializeMap`;
+        script.async = true;
+        script.onerror = () => {
+          console.error('Failed to load Google Maps');
+          document.getElementById('map_canvas').innerHTML = '<div class="map-error">Failed to load Google Maps. Please check your internet connection and try again.</div>';
+        };
+        document.head.appendChild(script);
+      } else {
+        console.error('CONFIG not loaded or API key missing');
+        console.log('CONFIG object:', typeof CONFIG !== 'undefined' ? CONFIG : 'undefined');
+        document.getElementById('map_canvas').innerHTML = '<div class="map-error">Configuration error. Please contact support.</div>';
+      }
+    }
+    
+    // Load when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadGoogleMaps);
+    } else {
+      loadGoogleMaps();
+    }
+  </script>
+
+  <!-- Scripts will be loaded dynamically after Google Maps -->
+  <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/geocodezip/geoxml3/polys/geoxml3.js" defer></script> -->
+  <!-- <script type="text/javascript" src="geoxml3.js" defer></script> -->
+  <!-- <script src="v3_epoly.js" type="text/javascript" defer> </script> -->
+
+  <script type="text/javascript">
+
+    var geoXml = null;
+    var map = null;
+    var geocoder = null;
+    // var toggleState = 1;
+    var infowindow = null;
+    var marker = null;
+
+    let autocomplete
+
+    function initialize() {
+      console.log('Initializing map...');
+      let areaSchools = []
+
+      geocoder = new google.maps.Geocoder();
+      infowindow = new google.maps.InfoWindow({ size: new google.maps.Size(150, 150) });
+      // create the map
+      var myOptions = {
+        zoom: 11,
+        center: new google.maps.LatLng(37.721414578054706, -122.16614335227737),
+        mapTypeControl: true,
+        mapTypeControlOptions: { style: google.maps.MapTypeControlStyle.DROPDOWN_MENU },
+        navigationControl: true,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+      }
+
+      map = new google.maps.Map(document.getElementById("map_canvas"),
+        myOptions);
+      geoXml = new geoXML3.parser({ map: map, singleInfoWindow: true, infoWindow: infowindow });
+
+      // Load the polygons for each school
+
+      // Elementary Schools
+      geoXml.parse('maps/garfield.xml');
+      geoXml.parse('maps/halkin.xml');
+      geoXml.parse('maps/jefferson.xml');
+      geoXml.parse('maps/madison.xml');
+      geoXml.parse('maps/mckinley.xml');
+      geoXml.parse('maps/monroe.xml');
+      geoXml.parse('maps/roosevelt.xml');
+      geoXml.parse('maps/washington.xml');
+
+      initAutocomplete()
+      console.log('Map initialized successfully');
+    }
+
+    function initAutocomplete() {
+
+      autocomplete = new google.maps.places.Autocomplete(
+        document.getElementById('address'),
+        {
+          types: ['address'],
+          componentRestrictions: {
+            country: 'US',
+          },
+          fields: ['place_id', 'geometry', 'name']
+        });
+
+      autocomplete.addListener('place_changed', onAddressChanged)
+    }
+
+    function onAddressChanged() {
+      var place = autocomplete.getPlace();
+
+      if (!place || !place.geometry) {
+        // User did not select a prediction or place has no geometry
+        console.log('No valid place selected');
+        document.getElementById('address').placeholder = "Search for your student's address";
+        return;
+      }
+      
+      // Optional: You can automatically trigger search when a place is selected
+      // showAddress(place.formatted_address || place.name);
+    }
+
+    function clearResults() {
+      const resultsContainer = document.getElementById("resultsContainer");
+      resultsContainer.innerHTML = '';
+    }
+
+    function showAddress(address) {
+
+      if (!address) {
+        alert("Please enter your address.")
+        return;
+      }
+
+      // Check if Google Maps is loaded
+      if (typeof google === 'undefined' || !google.maps || !map) {
+        alert("Map is still loading. Please wait a moment and try again.");
+        return;
+      }
+
+      // Replace with API call?
+      var middleSchools = [
+        {
+          lookup: 'bancroft',
+          id: 11,
+          schoolName: 'Bancroft Middle School',
+          schoolAddress: '1150 Bancroft Ave., San Leandro, CA 94577',
+          schoolWebsite: 'https://www.slusd.us/bancroft/',
+          point: [37.7289816, -122.1479936],
+          emailUrl: null,
+
+        },
+        {
+          lookup: 'muir',
+          id: 12,
+          schoolName: 'John Muir Middle School',
+          schoolAddress: '1444 Williams Street, San Leandro, CA 94577',
+          schoolWebsite: 'https://www.slusd.us/muir/',
+          point: [37.7146476, -122.1679971],
+          emailUrl: null,
+        },
+      ]
+
+      // Make lookup map for middleschools
+      const middleSchoolsMap = {};
+      middleSchools.forEach(school => {
+        middleSchoolsMap[school.lookup] = school;
+      });
+
+      var highSchools = [
+        {
+          lookup: 'SLHS',
+          id: 1,
+          schoolName: 'San Leandro High School',
+          schoolAddress: '2200 Bancroft Ave., San Leandro, CA 94577',
+          schoolWebsite: 'https://www.slusd.us/slhs/',
+          point: [37.716828, -122.1662896],
+          emailUrl: null,
+        },
+      ]
+
+      var schools = [
+        {
+          lookup: 'garfield',
+          id: 2,
+          schoolName: 'Garfield Elementary School',
+          schoolAddress: '13050 Aurora Drive, San Leandro, CA 94577',
+          schoolWebsite: 'https://www.slusd.us/garfield/',
+          middleSchool: middleSchoolsMap['muir'],
+          highSchool: highSchools[0],
+          point: [37.7036617, -122.1852033],
+          emailUrl: null,
+        },
+        {
+          lookup: 'jefferson',
+          id: 3,
+          schoolName: 'Jefferson Elementary',
+          schoolAddress: '14300 Bancroft Avenue, San Leandro, CA 94578',
+          schoolWebsite: 'https://www.slusd.us/jefferson/',
+          middleSchool: middleSchoolsMap['bancroft'],
+          highSchool: highSchools[0],
+          point: [37.7133938, -122.1363491],
+          emailUrl: null,
+        },
+        {
+          lookup: 'madison',
+          id: 4,
+          schoolName: 'Madison Elementary',
+          schoolAddress: '14751 Juniper St., San Leandro, CA 94579',
+          schoolWebsite: 'https://www.slusd.us/madison/',
+          middleSchool: middleSchoolsMap['muir'],
+          highSchool: highSchools[0],
+          point: [37.69539109999999, -122.1605923],
+          emailUrl: null,
+        },
+        {
+          lookup: 'mckinley',
+          id: 5,
+          schoolName: 'McKinley Elementary School',
+          schoolAddress: '2150 East 14th Street, San Leandro, CA 94577',
+          schoolWebsite: 'https://www.slusd.us/mckinley/',
+          middleSchool: middleSchoolsMap['bancroft'],
+          highSchool: highSchools[0],
+          point: [37.7192493, -122.1471065],
+          emailUrl: null,
+        },
+        {
+          lookup: 'monroe',
+          id: 6,
+          schoolName: 'Monroe Elementary School',
+          schoolAddress: '3750 Monterey Boulevard, San Leandro, CA 94578',
+          schoolWebsite: 'https://www.slusd.us/monroe/',
+          middleSchool: middleSchoolsMap['muir'],
+          highSchool: highSchools[0],
+          point: [37.69924839999999, -122.1457314],
+          emailUrl: null,
+        },
+        {
+          lookup: 'roosevelt',
+          id: 7,
+          schoolName: 'Roosevelt Elementary',
+          schoolAddress: '951 Dowling Blvd, San Leandro, CA 94577',
+          schoolWebsite: 'https://www.slusd.us/roosevelt/',
+          middleSchool: middleSchoolsMap['bancroft'],
+          highSchool: highSchools[0],
+          point: [37.7359716, -122.1469734],
+          emailUrl: null,
+        },
+        {
+          lookup: 'halkin',
+          id: 9,
+          schoolName: 'Halkin Elementary School',
+          schoolAddress: '1300 Williams Street, San Leandro, CA 94577',
+          schoolWebsite: 'https://www.slusd.us/halkin/',
+          middleSchool: middleSchoolsMap['muir'],
+          highSchool: highSchools[0],
+          point: [37.716828, -122.1662896],
+          emailUrl: null,
+        },
+        {
+          lookup: 'washington',
+          id: 8,
+          schoolName: 'Washington Elementary School',
+          schoolAddress: '250 Dutton Avenue, San Leandro, CA 94577',
+          schoolWebsite: 'https://www.slusd.us/washington/',
+          middleSchool: middleSchoolsMap['bancroft'],
+          highSchool: highSchools[0],
+          point: [37.7326948, -122.1571309],
+          emailUrl: null,
+        },
+
+      ];
+
+      var contentString = '<div style="display: flex; align-items: center;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><div style="margin-left: 5px;">' + address + '</div></div>';
+      contentString += '<br><div style="display: flex; align-items: center;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-school"><path d="M14 22v-4a2 2 0 1 0-4 0v4"/><path d="m18 10 4 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8l4-2"/><path d="M18 5v17"/><path d="m4 6 8-4 8 4"/><path d="M6 5v17"/><circle cx="12" cy="9" r="2"/></svg> <div style="display: block; margin-left: 5px;"><strong>Outside SLUSD Area<br><a href="https://www.slusd.us/families-community/enrollment/inter-district-transfers/" target="_blank">Click here for transfer information</a></strong></div></div>';
+
+      //  Close results at start of new search
+      if (document.getElementById('resultsContainer').classList.contains('expanded')) {
+        document.getElementById('resultsContainer').classList.remove('expanded');
+      }
+      geocoder.geocode({ 'address': address }, function (results, status) {
+        if (status == google.maps.GeocoderStatus.OK) {
+          var point = results[0].geometry.location;
+          // contentString += "<br>" + point;
+          // map.setCenter(point);
+          // map.setCenter([37.716828, -122.1662896]);
+          if (marker && marker.setMap) marker.setMap(null);
+          // Set marker for student home address
+          // marker = new google.maps.marker.AdvancedMarkerElement({
+          marker = new google.maps.Marker({
+            map: map,
+            position: point
+          });
+
+          let schoolName
+          let schoolAddress
+          let schoolWebsite
+          let emailUrl
+          let middleSchool
+          const highSchool = highSchools[0]
+          // findMiddleSchool(point)
+          for (var j = 0; j < geoXml.docs.length; j++) {
+
+            for (var i = 0; i < geoXml.docs[j].gpolygons.length; i++) {
+
+              // Error handling fallback for Firefox and Safari
+              if (typeof geoXml.docs[j].gpolygons[i].Contains !== 'function') {
+                if (address.includes('San Leandro')) {
+                  document.getElementById('map_canvas').innerHTML = `<div class="map-error">Error: There was an error loading your map. Please follow this link to continue your registration: <br /><br /> <a href="https://sanleandro.schoolmint.net/signin">https://sanleandro.schoolmint.net/signin</a></div>`
+
+                } else {
+
+                  document.getElementById('map_canvas').innerHTML = `<div class="map-error">Error: There was an error loading your map, and your address is outside of San Leandro. Please follow this link to continue your inter-district registration: <br /><br /> <a href="https://www.slusd.us/families-community/enrollment/inter-district-transfers/">https://www.slusd.us/families-community/enrollment/inter-district-transfers/</a></div>`
+                }
+                // console.log(address)
+
+
+              }
+              // console.log(geoXml.docs[j].gpolygons[i])
+              if (geoXml.docs[j].gpolygons[i].Contains(point)) {
+                // Get school name from xml title
+                // Adjust starting point in substring to remove 'maps/'
+
+                // School lookup for external GeoXML3
+                var schoolNameLookup = geoXml.docs[j].baseUrl.split('/').pop().split('.')[0] //.substring(14, geoXml.docs[j].baseUrl.length - 4)
+                // console.log({ schoolNameLookup })
+
+                // Get school info from 'schools' array or API call
+                var descructureSchool = schools.find(
+                  (school) => school.lookup === schoolNameLookup
+                );
+
+
+                // console.log('descructureSchool', { descructureSchool })
+                const lookup = descructureSchool.lookup
+                const id = descructureSchool.id
+                schoolName = descructureSchool.schoolName
+                // console.log(schoolName)
+                schoolAddress = descructureSchool.schoolAddress
+                schoolWebsite = descructureSchool.schoolWebsite
+                emailUrl = descructureSchool.emailUrl
+                middleSchool = descructureSchool.middleSchool
+
+
+                // const highSchool = highSchools[0]
+
+                // Update content string with school info
+                contentString = '<div style="display: flex; align-items: center;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><div style="margin-left: 5px;">' + address + '</div></div>';
+                contentString += '<br><div style="display: flex; align-items: center;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-school"><path d="M14 22v-4a2 2 0 1 0-4 0v4"/><path d="m18 10 4 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8l4-2"/><path d="M18 5v17"/><path d="m4 6 8-4 8 4"/><path d="M6 5v17"/><circle cx="12" cy="9" r="2"/></svg> <div style="display: block; margin-left: 5px;"><strong><a href="' + schoolWebsite + '" target="_blank">' + schoolName + '</a></strong><div>' + schoolAddress + '</div></div></div>';
+                // contentString += "<br>" + point;
+
+                // contentString += "<br>" + schoolAddress;
+                break
+
+              }
+              //     }      catch (error) {
+              //         document.getElementById('map_canvas').innerHTML = 'An error occurred. Please continue your enrollment by clicking here.'
+              // }
+            }
+
+            if (schoolName) {
+              break
+            }
+          }
+          google.maps.event.addListener(marker, 'click', function () {
+            infowindow.setContent(contentString);
+            infowindow.open(map, marker);
+          });
+
+          google.maps.event.trigger(marker, "click");
+
+          var resultsTitle = document.getElementById('resultsTitle')
+          // clearResults()
+          document.getElementById('resultsContainer').appendChild(resultsTitle)
+          console.log({ schoolName })
+          if (schoolName) {
+            resultsTitle.innerHTML = '<a href="https://sanleandro.schoolmint.net/welcome" target="_blank"><button>Click here to enroll today!</button></a>'
+            areaSchools = [
+              {
+                schoolName: schoolName,
+                schoolAddress: schoolAddress,
+                schoolWebsite: schoolWebsite,
+                grades: 'K-5'
+              },
+              {
+                schoolName: middleSchool.schoolName,
+                schoolAddress: middleSchool.schoolAddress,
+                schoolWebsite: middleSchool.schoolWebsite,
+                grades: '6-8'
+              },
+              {
+                schoolName: highSchool.schoolName,
+                schoolAddress: highSchool.schoolAddress,
+                schoolWebsite: highSchool.schoolWebsite,
+                grades: '9-12'
+              }
+            ]
+
+            // Clear school results if any were found previously 
+            document.getElementById('resultsContainerSchools').innerHTML = ''
+
+            areaSchools.forEach((school) => {
+              displaySchool(school)
+            })
+
+            // Dropdown email form if address is found in range of a polygon
+            // document.getElementById('schoolSpan').innerHTML = schoolName
+            document.getElementById('resultsContainer').classList.add('expanded')
+            // document.getElementById('end').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('resultsContainer').scrollIntoView({ behavior: 'smooth' });
+          }
+
+          if (!schoolName) {
+            // console.log('No schools in your area')
+            var resultsContainerSchools = document.getElementById('resultsContainerSchools')
+            resultsContainerSchools.innerHTML = '<div style="map-error">Your address is outside of the bounds of the San Leandro Unified School District. <br /> Please click the button below to start the Inter-District Transfer process.</div>'
+            resultsTitle.innerHTML = '<a href="https://www.slusd.us/families-community/enrollment/inter-district-transfers/" target="_blank"><button>Click here to start the Inter-District Transfer process</button></a>'
+            document.getElementById('resultsContainer').classList.add('expanded')
+
+          }
+
+        } else {
+          alert("Geocode was not successful for the following reason: " + status);
+        }
+      });
+    }
+
+
+    function displaySchool(school, divId = 'resultsContainerSchools') {
+
+      const resultsDiv = document.getElementById(divId);
+
+      const schoolCard = document.createElement("div");
+      schoolCard.classList.add("school-card");
+
+      // Add line for school grades
+      const schoolGrades = document.createElement("p");
+      schoolGrades.innerHTML = `<span class="school-grades">Grades: ${school.grades}</span>`;
+      schoolCard.appendChild(schoolGrades);
+      resultsDiv.appendChild(schoolCard);
+
+      // Add school name
+      const schoolName = document.createElement("h3");
+      schoolName.innerHTML = `<a href="${school.schoolWebsite}" target="_blank">${school.schoolName}</a>`;
+      schoolCard.appendChild(schoolName);
+
+
+      // Add school address
+      const schoolAddress = document.createElement("p");
+      schoolAddress.innerHTML = `<a href="https://maps.google.com/?q=${school.schoolAddress}" target="_blank">${school.schoolAddress}</a>`;
+      schoolCard.appendChild(schoolAddress);
+
+    }
+
+  </script>
+
+  <script>
+    function loadScript(src, onload, onerror) {
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.src = src;
+      script.onload = onload ? onload : function () { };
+      script.onerror = onerror ? onerror : function () { };
+      document.head.appendChild(script);
+    }
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="styles.css" />
+</head>
+
+<body>
+  <div id="content" class="content">
+
+    <div id="header" class="header">
+
+      <a href="https://www.slusd.us">
+        <image src="slusd-logo-white-border-128x128.svg" class="logo" alt="SLUSD Logo" />
+      </a>
+      <h1 class="title">
+        <span class="title-text">SLUSD School Area Lookup </span>
+        <br />
+        <span class="subtitle">San Leandro Unified School District</span>
+      </h1>
+    </div>
+    <p class="description">Type in your address to find your neighborhood schools!</p>
+    <form action="#" onsubmit="showAddress(this.address.value); return false" class="school-search-form">
+      <div class="form-group">
+        <label for="address" class="form-label">Address Search</label>
+        <input type="text" id="address" name="address" placeholder="2600 Teagarden St, San Leandro, CA 94577"
+          class="form-input " />
+        <!-- <image src="search-icon.svg" class="form-icon" alt="Search Icon" /> -->
+        <input type="submit" value="Search" class="form-submit " />
+        <input type="submit" style="display: none" />
+      </div>
+    </form>
+    <div id="map_canvas" class="map-canvas">
+      <div class="map-loading">Loading...</div>
+    </div>
+    <div class="map-container">
+
+      <div id="resultsContainer" class="results-container">
+        <h2 id="resultsTitle" class="results-container-title">Your Schools</h2>
+        <div id="resultsContainerSchools" class="results-container-schools"></div>
+      </div>
+    </div>
+    <div id="end"></div>
+
+  </div>
+  <div class="clear"></div>
+
+</body>
+<scribe-shadow id="crxjs-ext"
+  style="position: fixed; width: 0px; height: 0px; top: 0px; left: 0px; z-index: 2147483647; overflow: visible;"></scribe-shadow>
+<div class="pac-container pac-logo hdpi" style="display: none;"></div>
+<script>
+  /* Fix for Firefox & Safari */
+  window.addEventListener('load', () => {
+    if (typeof google.maps.Geocoder !== 'function') {
+      console.warn("google.maps.Geocoder !== 'function'")
+
+      setTimeout(() => {
+        console.log('reloading for Google Maps');
+
+        if (typeof geoXML3 === 'undefined') {
+          console.log("typeof geoXML3 === 'undefined'");
+          setTimeout(() => {
+            console.log('reloading for geoXML3');
+            loadScript('geoxml3.js', function () {
+
+              console.log('geoXML3 loaded')
+
+              initialize();
+              return
+            })
+            initialize();
+          }, 1000);
+          initialize();
+          return;
+        }
+        console.log('loaded')
+      }, 1000);
+      initialize();
+
+      return;
+    } else {
+
+      initialize();
+    }
+
+  });
+</script>
+</body>
+
+</html>
